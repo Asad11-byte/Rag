@@ -16,10 +16,7 @@ rag = RagService()
 async def stream_chat(
     request: ChatRequest,
 ):
-
-    generator = rag.stream(
-        request.question
-    )
+    generator = rag.stream(request.question)
 
     return StreamingResponse(
         generator,

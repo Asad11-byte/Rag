@@ -1,8 +1,10 @@
+from uuid import uuid4
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
-    VectorParams,
     PointStruct,
+    VectorParams,
 )
 
 from app.core.config import settings
@@ -13,16 +15,12 @@ class QdrantService:
     COLLECTION_NAME = "ai_agent_security"
 
     def __init__(self):
-
         self.client = QdrantClient(
             url=settings.QDRANT_URL,
             api_key=settings.QDRANT_API_KEY,
         )
 
-    def create_collection(
-        self,
-        vector_size: int,
-    ):
+    def create_collection(self, vector_size: int):
 
         collections = self.client.get_collections()
 
@@ -42,27 +40,25 @@ class QdrantService:
             )
 
     def upload_vectors(
-    self,
-    embeddings: list[list[float]],
-    chunks: list[str],
-    source_name: str,
-):
+        self,
+        embeddings: list[list[float]],
+        chunks: list[str],
+        source_name: str,
+    ):
 
         points = []
 
-        for index, (embedding, chunk) in enumerate(
-            zip(embeddings, chunks)
-        ):
+        for index, (embedding, chunk) in enumerate(zip(embeddings, chunks)):
 
             points.append(
                 PointStruct(
-                    id=index,
+                    id=str(uuid4()),
                     vector=embedding,
                     payload={
-    "text": chunk,
-    "chunk_id": index,
-    "source": source_name
-},
+                        "text": chunk,
+                        "chunk_id": index,
+                        "source": source_name,
+                    },
                 )
             )
 
@@ -72,14 +68,15 @@ class QdrantService:
         )
 
     def search(
-    self,
-    embedding: list[float],
-    limit: int = 5,
-):
-     response = self.client.query_points(
-        collection_name=self.COLLECTION_NAME,
-        query=embedding,
-        limit=limit,
-    )
+        self,
+        embedding: list[float],
+        limit: int = 5,
+    ):
 
-     return response.points
+        response = self.client.query_points(
+            collection_name=self.COLLECTION_NAME,
+            query=embedding,
+            limit=limit,
+        )
+
+        return response.points

@@ -6,44 +6,41 @@ from app.services.groq_service import GroqService
 class RagService:
 
     def __init__(self):
-
         self.voyage = VoyageService()
         self.qdrant = QdrantService()
         self.groq = GroqService()
 
-    def ask(
+    def stream(
         self,
         question: str,
     ):
-
+        # Create embedding for the user's question
         embedding = self.voyage.embed_text(question)
 
+        # Search Qdrant
         results = self.qdrant.search(
             embedding=embedding,
             limit=5,
         )
 
-        # collect texts from results with a minimum score
+        # Build context from the retrieved chunks
         contexts = []
-        for result in results:
-            try:
-                score = getattr(result, "score", None)
-                text = result.payload.get("text") if getattr(result, "payload", None) else None
-            except Exception:
-                score = None
-                text = None
 
-            if score is not None and score >= 0.70 and text:
+        for result in results:
+
+            score = getattr(result, "score", 0)
+
+            payload = getattr(result, "payload", {})
+
+            text = payload.get("text")
+
+            if score >= 0.70 and text:
                 contexts.append(text)
 
         context = "\n\n".join(contexts)
 
+        # Stream answer from Groq
         return self.groq.stream_answer(
-        context=context,
-        question=question,
-       )
-
-        return {
-            "answer": answer,
-            "sources": contexts,
-        }
+            context=context,
+            question=question,
+        )
