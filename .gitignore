@@ -1,6 +1,31 @@
-#virtual environments
-./venv/
-## Python cache files
+# ==========================
+# Python
+# ==========================
+venv/
+.venv/
 __pycache__/
-#.env
-/env/
+*.pyc
+*.pyo
+*.pyd
+
+# ==========================
+# Environment Files
+# ==========================
+.env
+frontend/.env
+
+# ==========================
+# Node
+# ==========================
+frontend/node_modules/
+
+# ==========================
+# VS Code
+# ==========================
+.vscode/
+
+# ==========================
+# Build Files
+# ==========================
+frontend/dist/
+backend/.pytest_cache/
