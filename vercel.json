@@ -1,5 +1,6 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "builds": [
     {
       "src": "api/index.py",
@@ -28,6 +29,19 @@
     {
       "src": "/((?!api/).*)",
       "dest": "/frontend/index.html"
+=======
+
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.11"
+    }
+  },
+
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+>>>>>>> 3bbe6e8 (Again vercel json fix)
     }
   ]
 }
