@@ -17,17 +17,15 @@ function ChatWindow({ messages }) {
         return (
             <div className="chat-window">
                 <div className="welcome">
-                    <h1>👋 Welcome</h1>
+                    <h1>Welcome</h1>
 
                     <p>
-                        Upload your AI Agent Security PDF and start asking
-                        questions about it.
+                        Suggested prompts
                     </p>
 
                     <div className="welcome-box">
-                        <p>✔ Upload a PDF</p>
-                        <p>✔ Ask security questions</p>
-                        <p>✔ Get AI-powered answers</p>
+                        <p>🛡️ What are the biggest security threats facing AI agents today?</p>
+                        <p>🛡️ What defenses can protect AI agents against security attacks?</p>
                     </div>
                 </div>
             </div>
@@ -41,6 +39,7 @@ function ChatWindow({ messages }) {
                     key={index}
                     role={message.role}
                     content={message.content}
+                    citations={message.citations}
                 />
             ))}
 

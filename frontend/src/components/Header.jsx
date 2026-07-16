@@ -3,7 +3,7 @@ import "../styles/chat.css";
 function Header() {
     return (
         <header className="chat-header">
-            <h2>AI Agent Security Assistant</h2>
+            <h2>Ai Research Rag Assistant</h2>
             <p>Ask questions about your uploaded documents</p>
         </header>
     );

@@ -1,31 +1,53 @@
+from pathlib import Path
+
 from fastapi import APIRouter
 
 from app.services.document_loader import DocumentLoader
 from app.services.chunk_service import ChunkService
-from app.services.voyage_service import VoyageService
 
 router = APIRouter(
-    prefix="/document",
-    tags=["Document"],
+    tags=["Documents"],
 )
 
+DOCUMENT_FOLDER = Path("app/data/documents")
 
-@router.get("/test")
+
+@router.get("/documents")
+async def list_documents():
+    """
+    Return all uploaded PDF documents.
+    """
+
+    pdfs = []
+
+    if DOCUMENT_FOLDER.exists():
+
+        for file in DOCUMENT_FOLDER.glob("*.pdf"):
+
+            pdfs.append(
+                {
+                    "name": file.name,
+                    "url": f"/documents/{file.name}",
+                }
+            )
+
+    return pdfs
+
+
+@router.get("/document/test")
 async def test_document():
+    """
+    Test document loading and chunking.
+    """
 
-    text = DocumentLoader.load_document(
+    pages = DocumentLoader.load_document(
         "app/data/documents/AI-Agent-Security.pdf"
     )
 
-    chunks = ChunkService.chunk_text(text)
-
-    voyage = VoyageService()
-
-    embedding = voyage.embed_text(chunks[0])
+    chunks = ChunkService.chunk_text(pages)
 
     return {
-        "characters": len(text),
+        "pages": len(pages),
         "chunks": len(chunks),
-        "embedding_dimension": len(embedding),
-        "embedding_preview": embedding[:5],
+        "first_chunk": chunks[0],
     }

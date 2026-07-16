@@ -2,7 +2,7 @@ from pathlib import Path
 
 from app.services.document_loader import DocumentLoader
 from app.services.chunk_service import ChunkService
-from app.services.voyage_service import VoyageService
+from app.services.jina_service import JinaService
 from app.services.qdrant_service import QdrantService
 
 
@@ -11,41 +11,52 @@ class IndexService:
     def __init__(self):
         self.loader = DocumentLoader()
         self.chunker = ChunkService()
-        self.embedding = VoyageService()
+        self.embedding = JinaService()
         self.qdrant = QdrantService()
 
     def index_document(self, file_path: str):
 
-        # Load PDF
-        text = self.loader.load_document(file_path)
+        # Load PDF page-by-page
+        pages = self.loader.load_document(file_path)
 
-        if not text.strip():
+        if not pages:
             raise Exception("No text could be extracted from the PDF.")
 
-        # Create chunks
-        chunks = self.chunker.chunk_text(text)
+        # Create chunks (each chunk contains text + page)
+        chunks = self.chunker.chunk_text(pages)
 
         if not chunks:
             raise Exception("No chunks were created from the document.")
 
-        # Remove this line after testing if you want the full document indexed
+        # -------------------------------------------------
+        # TEMPORARY FOR JINA FREE TIER TESTING
+        # Remove this line once you want to index the full PDF
+        # -------------------------------------------------
         chunks = chunks[:3]
 
+        # Extract only text for embedding
+        chunk_texts = [
+            chunk["text"]
+            for chunk in chunks
+        ]
+
         # Generate embeddings
-        embeddings = self.embedding.embed_documents(chunks)
+        embeddings = self.embedding.embed_documents(
+            chunk_texts
+        )
 
         if not embeddings:
             raise Exception("Embedding generation failed.")
 
-        # Create collection
+        # Create collection if it doesn't exist
         self.qdrant.create_collection(
             vector_size=len(embeddings[0])
         )
 
-        # Get filename for metadata
+        # Source filename
         source_name = Path(file_path).name
 
-        # Upload vectors
+        # Upload vectors with metadata
         self.qdrant.upload_vectors(
             embeddings=embeddings,
             chunks=chunks,
@@ -55,7 +66,7 @@ class IndexService:
         return {
             "status": "success",
             "source": source_name,
-            "characters": len(text),
+            "pages": len(pages),
             "chunks": len(chunks),
             "vectors_uploaded": len(embeddings),
         }

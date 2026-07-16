@@ -1,10 +1,20 @@
-import { Plus, Shield } from "lucide-react";
+import { FolderOpen, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import UploadButton from "./UploadButton";
 
 import "../styles/sidebar.css";
 
 function Sidebar() {
+
+    const [documents, setDocuments] = useState([]);
+
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_API_URL}/documents`)
+            .then((res) => res.json())
+            .then((data) => setDocuments(data))
+            .catch((err) => console.error(err));
+    }, []);
 
     return (
 
@@ -16,17 +26,9 @@ function Sidebar() {
 
                     <Shield size={28} />
 
-                    <h2>AI Security RAG</h2>
+                    <h2>AI Research RAG</h2>
 
                 </div>
-
-                <button className="new-chat-btn">
-
-                    <Plus size={18} />
-
-                    New Chat
-
-                </button>
 
                 <UploadButton />
 
@@ -34,13 +36,47 @@ function Sidebar() {
 
             <div className="chat-history">
 
-                <h4>Recent Chats</h4>
+                <h4>📚 Uploaded Documents</h4>
+
+                {documents.length === 0 ? (
+
+                    <p className="empty-docs">
+                        No PDF uploaded yet.
+                    </p>
+
+                ) : (
+
+                    documents.map((doc) => (
+
+                        <div
+                            key={doc.name}
+                            className="document-item"
+                            onClick={() =>
+                                window.open(
+                                    `${import.meta.env.VITE_API_URL}${doc.url}`,
+                                    "_blank"
+                                )
+                            }
+                        >
+
+                            <FolderOpen size={18} />
+
+                            <span>{doc.name}</span>
+
+                        </div>
+
+                    ))
+
+                )}
 
             </div>
 
             <div className="sidebar-footer">
 
-                AI Agent Security RAG
+                <small>
+                    📄 {documents.length} Document
+                    {documents.length !== 1 ? "s" : ""}
+                </small>
 
             </div>
 

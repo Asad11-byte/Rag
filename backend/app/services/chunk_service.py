@@ -2,29 +2,49 @@ from typing import List
 
 
 class ChunkService:
+
     @staticmethod
     def chunk_text(
-        text: str,
-        chunk_size: int = 800,
-        overlap: int = 150,
-    ) -> List[str]:
+        pages: List[dict],
+        chunk_size: int = 700,
+        overlap: int = 120,
+    ) -> List[dict]:
         """
-        Split text into overlapping chunks.
+        Split PDF pages into overlapping chunks while preserving
+        page numbers and removing unnecessary whitespace.
         """
-
-        if not text.strip():
-            return []
 
         chunks = []
 
-        start = 0
+        for page in pages:
 
-        while start < len(text):
+            page_number = page["page"]
 
-            end = start + chunk_size
+            text = page["text"].strip()
 
-            chunks.append(text[start:end])
+            if not text:
+                continue
 
-            start += chunk_size - overlap
+            start = 0
+
+            while start < len(text):
+
+                end = min(start + chunk_size, len(text))
+
+                chunk = text[start:end].strip()
+
+                if chunk:
+
+                    chunks.append(
+                        {
+                            "text": chunk,
+                            "page": page_number,
+                        }
+                    )
+
+                if end == len(text):
+                    break
+
+                start += chunk_size - overlap
 
         return chunks

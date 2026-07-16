@@ -15,12 +15,16 @@ class QdrantService:
     COLLECTION_NAME = "ai_agent_security"
 
     def __init__(self):
+
         self.client = QdrantClient(
             url=settings.QDRANT_URL,
             api_key=settings.QDRANT_API_KEY,
         )
 
-    def create_collection(self, vector_size: int):
+    def create_collection(
+        self,
+        vector_size: int,
+    ):
 
         collections = self.client.get_collections()
 
@@ -42,20 +46,23 @@ class QdrantService:
     def upload_vectors(
         self,
         embeddings: list[list[float]],
-        chunks: list[str],
+        chunks: list[dict],
         source_name: str,
     ):
 
         points = []
 
-        for index, (embedding, chunk) in enumerate(zip(embeddings, chunks)):
+        for index, (embedding, chunk) in enumerate(
+            zip(embeddings, chunks)
+        ):
 
             points.append(
                 PointStruct(
                     id=str(uuid4()),
                     vector=embedding,
                     payload={
-                        "text": chunk,
+                        "text": chunk["text"],
+                        "page": chunk["page"],
                         "chunk_id": index,
                         "source": source_name,
                     },
@@ -79,4 +86,4 @@ class QdrantService:
             limit=limit,
         )
 
-        return response.points
+        return response.points  

@@ -1,51 +1,41 @@
-from pathlib import Path
-
 import fitz  # PyMuPDF
-from docx import Document
 
 
 class DocumentLoader:
     @staticmethod
-    def load_pdf(file_path: str) -> str:
-        """Load text from a PDF."""
+    def load_document(file_path: str) -> list[dict]:
+        """
+        Load a PDF and return text page-by-page.
+
+        Returns:
+        [
+            {
+                "page": 1,
+                "text": "..."
+            },
+            ...
+        ]
+        """
+
         document = fitz.open(file_path)
 
-        text = ""
+        pages = []
 
-        for page in document:
-            text += page.get_text()
+        for page_number, page in enumerate(document, start=1):
+
+            text = page.get_text("text").strip()
+
+            # Skip empty pages
+            if not text:
+                continue
+
+            pages.append(
+                {
+                    "page": page_number,
+                    "text": text,
+                }
+            )
 
         document.close()
 
-        return text
-
-    @staticmethod
-    def load_docx(file_path: str) -> str:
-        """Load text from a DOCX."""
-        document = Document(file_path)
-
-        return "\n".join(
-            paragraph.text
-            for paragraph in document.paragraphs
-        )
-
-    @staticmethod
-    def load_txt(file_path: str) -> str:
-        """Load text from a TXT."""
-        with open(file_path, "r", encoding="utf-8") as file:
-            return file.read()
-
-    @staticmethod
-    def load_document(file_path: str) -> str:
-        extension = Path(file_path).suffix.lower()
-
-        if extension == ".pdf":
-            return DocumentLoader.load_pdf(file_path)
-
-        if extension == ".docx":
-            return DocumentLoader.load_docx(file_path)
-
-        if extension == ".txt":
-            return DocumentLoader.load_txt(file_path)
-
-        raise ValueError(f"Unsupported file type: {extension}")
+        return pages

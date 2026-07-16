@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # APIs
     GROQ_API_KEY: str
-    VOYAGE_API_KEY: str
+    JINA_API_KEY: str
 
     # Qdrant
     QDRANT_API_KEY: str
