@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import shutil
 
@@ -15,8 +16,23 @@ router = APIRouter(
     tags=["Upload"],
 )
 
-UPLOAD_FOLDER = Path("app/data/documents")
+# --- DYNAMIC VERCEL-SAFE PATH RESOLUTION ---
+if os.environ.get("VERCEL"):
+    # Vercel serverless functions can only write files into the /tmp directory
+    UPLOAD_FOLDER = Path("/tmp/documents")
+else:
+    # Local setup: dynamically climbs directories to anchor to your 'backend' folder
+    _current_file = Path(__file__).resolve()
+    _root_dir = _current_file
+    for _ in range(5):
+        if (_root_dir / "backend").exists():
+            break
+        _root_dir = _root_dir.parent
+    UPLOAD_FOLDER = _root_dir / "backend" / "app" / "data" / "documents"
+
+# This creates the directory safely without throwing read-only errors on Vercel
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+# ---------------------------------------------
 
 index_service = IndexService()
 
