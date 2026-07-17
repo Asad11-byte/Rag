@@ -1,14 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "app/main.py": {
-      "runtime": "@vercel/python"
+    "api/index.py": {
+      "maxDuration": 300
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "app/main.py"
+      "source": "/(.*)",
+      "destination": "/api/index.py"
     }
   ]
 }
