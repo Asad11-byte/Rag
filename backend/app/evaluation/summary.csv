@@ -1,0 +1,5 @@
+Metric,Score
+Precision@5,0.36
+Recall@5,1.0
+MRR,1.0
+nDCG@5,1.0

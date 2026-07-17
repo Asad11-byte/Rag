@@ -1,0 +1,6 @@
+question,retrieved,expected,precision@5,recall@5,rr,ndcg@5
+What is Prompt Injection?,"['AI-Agent-Security.pdf#14','AI-Agent-Security.pdf#15','AI-Agent-Security.pdf#8','AI_threats.pdf#1','AI-Agent-Security.pdf#20']","['AI-Agent-Security.pdf#14','AI-Agent-Security.pdf#15']",0.40,1.00,1.00,1.00
+What are adversarial attacks?,"['AI-Agent-Security.pdf#10','AI-Agent-Security.pdf#9','AI_threats.pdf#1','AI-Agent-Security.pdf#18','AI-Agent-Security.pdf#5']","['AI-Agent-Security.pdf#9','AI-Agent-Security.pdf#10']",0.40,1.00,1.00,1.00
+What is model poisoning?,"['AI_threats.pdf#3','AI-Agent-Security.pdf#6','AI-Agent-Security.pdf#2','AI_threats.pdf#1','AI-Agent-Security.pdf#10']","['AI_threats.pdf#3']",0.20,1.00,1.00,1.00
+What defenses are discussed?,"['AI-Agent-Security.pdf#18','AI-Agent-Security.pdf#19','AI-Agent-Security.pdf#20','AI_threats.pdf#2','AI-Agent-Security.pdf#8']","['AI-Agent-Security.pdf#18','AI-Agent-Security.pdf#19']",0.40,1.00,1.00,1.00
+What are AI security threats?,"['AI-Agent-Security.pdf#2','AI_threats.pdf#1','AI-Agent-Security.pdf#3','AI-Agent-Security.pdf#4','AI_threats.pdf#2']","['AI-Agent-Security.pdf#2','AI_threats.pdf#1']",0.40,1.00,1.00,1.00

@@ -18,10 +18,19 @@ class RagService:
     ):
         """
         Retrieve the most relevant document chunks from Qdrant.
+
+        Returns:
+        {
+            "context": str,
+            "citations": [...],
+            "retrieved": [...]
+        }
         """
 
+        # Generate embedding for the user query
         embedding = self.jina.embed_text(question)
 
+        # Search Qdrant
         results = self.qdrant.search(
             embedding=embedding,
             limit=limit,
@@ -30,6 +39,8 @@ class RagService:
         contexts = []
 
         citations = []
+
+        retrieved = []
 
         seen_chunks = set()
 
@@ -66,43 +77,51 @@ Page: {page}
 """
             )
 
-            citations.append(
-                {
-                    "source": source,
-                    "page": page,
-                    "score": round(score, 3),
-                }
-            )
+            item = {
+                "rank": len(citations) + 1,
+                "source": source,
+                "page": page,
+                "score": round(score, 3),
+            }
+
+            citations.append(item)
+
+            retrieved.append(item)
 
         context = "\n\n------------------------\n\n".join(contexts)
 
         print("\n========== RETRIEVED ==========")
 
-        if citations:
+        if retrieved:
 
-            for citation in citations:
+            for item in retrieved:
 
                 print(
-                    f"{citation['source']} | "
-                    f"Page {citation['page']} | "
-                    f"Score {citation['score']}"
+                    f"[{item['rank']}] "
+                    f"{item['source']} | "
+                    f"Page {item['page']} | "
+                    f"Score {item['score']}"
                 )
 
         else:
 
-            print("No chunks found.")
+            print("No relevant chunks found.")
 
         print("================================\n")
 
         return {
             "context": context,
             "citations": citations,
+            "retrieved": retrieved,
         }
 
     def stream(
         self,
         question: str,
     ):
+        """
+        Stream the LLM response.
+        """
 
         retrieval = self.retrieve(question)
 
@@ -115,6 +134,9 @@ Page: {page}
         self,
         question: str,
     ):
+        """
+        Non-streaming response.
+        """
 
         retrieval = self.retrieve(question)
 
