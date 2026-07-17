@@ -1,0 +1,5 @@
+app/data/documents/
+app/evaluation/
+__pycache__/
+*.pyc
+.git
