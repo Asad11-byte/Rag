@@ -9,13 +9,21 @@ export default defineConfig({
       name: 'force-close-on-end',
       apply: 'build',
       closeBundle() {
-        // Force the Node process to shut down 1 second after compilation ends
         setTimeout(() => process.exit(0), 1000);
       }
     }
   ],
   build: {
-    // Explicitly shut off all file watchers during a production build
     watch: false
+  },
+  // Add this block to handle local development redirecting to your FastAPI server
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   }
 })

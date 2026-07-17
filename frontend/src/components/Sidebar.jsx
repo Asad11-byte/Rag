@@ -10,7 +10,7 @@ function Sidebar() {
     const [documents, setDocuments] = useState([]);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL}/documents`)
+        fetch('/api/documents')
             .then((res) => res.json())
             .then((data) => setDocuments(data))
             .catch((err) => console.error(err));
