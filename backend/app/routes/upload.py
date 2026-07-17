@@ -15,11 +15,29 @@ router = APIRouter(
     tags=["Upload"],
 )
 
-UPLOAD_FOLDER = Path("app/data/documents")
-UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+# ==========================================
+# Upload Directory
+# ==========================================
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+UPLOAD_FOLDER = BASE_DIR / "data" / "documents"
+
+UPLOAD_FOLDER.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+# ==========================================
+# Services
+# ==========================================
 
 index_service = IndexService()
 
+
+# ==========================================
+# Upload PDF
+# ==========================================
 
 @router.post("/")
 async def upload_pdf(
@@ -40,9 +58,12 @@ async def upload_pdf(
     destination = UPLOAD_FOLDER / filename
 
     try:
+
+        # Save uploaded PDF
         with destination.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        # Index into Qdrant
         result = index_service.index_document(
             str(destination)
         )
@@ -51,14 +72,17 @@ async def upload_pdf(
             "status": "success",
             "message": "PDF uploaded and indexed successfully.",
             "filename": filename,
-            **result
+            "path": str(destination),
+            **result,
         }
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
-            detail=f"Indexing failed: {str(e)}"
+            detail=f"Failed to upload/index PDF: {str(e)}"
         )
 
     finally:
+
         file.file.close()

@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
-from app.routes.document import router as document_router
+from backend.app.core.config import settings
+from backend.app.routes.document import router as document_router
 
-from app.routes.index import router as index_router
-from app.routes.chat import router as chat_router
-from app.routes.upload import router as upload_router
-from app.routes import document
+from backend.app.routes.index import router as index_router
+from backend.app.routes.chat import router as chat_router
+from backend.app.routes.upload import router as upload_router
+from backend.app.routes import document
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
@@ -25,6 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "https://rag-ldnzouwi6-asad11-bytes-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
