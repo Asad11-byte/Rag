@@ -40,7 +40,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:5173",
 
     # Replace with your actual Vercel domain
-    "https://YOUR-PROJECT.vercel.app",
+    "https://rag-gold-sigma.vercel.app",
 ]
 
 app.add_middleware(
