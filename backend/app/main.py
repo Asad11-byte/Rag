@@ -17,42 +17,43 @@ app = FastAPI(
     version=settings.APP_VERSION,
 )
 
-# ==========================================
+# ==================================================
 # Documents Directory
-# ==========================================
+# ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent
 
 DOCUMENTS_DIR = BASE_DIR / "data" / "documents"
-
-DOCUMENTS_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 app.mount(
     "/documents",
-    StaticFiles(directory=str(DOCUMENTS_DIR)),
+    StaticFiles(directory=DOCUMENTS_DIR),
     name="documents",
 )
 
-# ==========================================
+# ==================================================
 # CORS
-# ==========================================
+# ==================================================
+
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+
+    # Replace with your actual Vercel domain
+    "https://YOUR-PROJECT.vercel.app",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ==========================================
+# ==================================================
 # Routes
-# ==========================================
+# ==================================================
 
 app.include_router(document_router)
 app.include_router(index_router)
@@ -60,9 +61,9 @@ app.include_router(chat_router)
 app.include_router(upload_router)
 app.include_router(document.router)
 
-# ==========================================
-# Health Endpoints
-# ==========================================
+# ==================================================
+# Health
+# ==================================================
 
 @app.get("/")
 async def root():
