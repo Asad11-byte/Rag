@@ -44,8 +44,6 @@ if DOCUMENTS_DIR.exists():
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
 
-    # Replace with your actual Vercel domain
-    "https://rag-gold-sigma.vercel.app",
 ]
 
 app.add_middleware(
