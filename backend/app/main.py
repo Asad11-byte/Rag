@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -18,19 +18,17 @@ app = FastAPI(
 )
 
 # ==================================================
-# Documents Directory
+# vercel fix Documents Directory
 # ==================================================
-
 BASE_DIR = Path(__file__).resolve().parent
+IS_VERCEL = bool(os.getenv("VERCEL"))
 
-DOCUMENTS_DIR = BASE_DIR / "data" / "documents"
-DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+if not IS_VERCEL:
+    # Only create/mount a local documents folder in local dev.
+    DOCUMENTS_DIR = BASE_DIR / "data" / "documents"
+    DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+    app.mount("/documents", StaticFiles(directory=DOCUMENTS_DIR), name="documents")
 
-app.mount(
-    "/documents",
-    StaticFiles(directory=DOCUMENTS_DIR),
-    name="documents",
-)
 
 # ==================================================
 # CORS

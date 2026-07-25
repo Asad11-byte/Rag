@@ -1,5 +1,8 @@
-from pathlib import Path
+import os
 import shutil
+import tempfile
+import uuid
+from pathlib import Path
 
 from fastapi import (
     APIRouter,
@@ -18,15 +21,26 @@ router = APIRouter(
 # ==========================================
 # Upload Directory
 # ==========================================
+# On Vercel, only /tmp is writable — and it does NOT persist across
+# cold starts or across concurrent instances. That's fine here: the
+# PDF only needs to exist long enough for index_service to parse and
+# embed it into Qdrant, which IS the durable store. We write to a
+# per-request temp path and delete it once indexing is done, rather
+# than treating local disk as permanent storage.
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+IS_VERCEL = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
-UPLOAD_FOLDER = BASE_DIR / "data" / "documents"
+if IS_VERCEL:
+    UPLOAD_FOLDER = Path(tempfile.gettempdir()) / "uploads"
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    UPLOAD_FOLDER = BASE_DIR / "data" / "documents"
 
-UPLOAD_FOLDER.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+# NOTE: this is safe to call at import time because /tmp itself always
+# exists and is writable on Vercel — we're just creating a subfolder
+# inside it, not trying to write to a read-only project directory
+# like the old `BASE_DIR / "data" / "documents"` path did in production.
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
 # ==========================================
 # Services
@@ -45,6 +59,11 @@ async def upload_pdf(
 ):
     """
     Upload a PDF and automatically index it into Qdrant.
+
+    The PDF itself is only kept on disk for the duration of this
+    request (long enough for index_service to parse/chunk/embed it).
+    The durable result of this call is what ends up in Qdrant, not
+    the file on disk.
     """
 
     if file.content_type != "application/pdf":
@@ -53,17 +72,19 @@ async def upload_pdf(
             detail="Only PDF files are allowed."
         )
 
-    filename = Path(file.filename).name
+    original_filename = Path(file.filename).name
 
-    destination = UPLOAD_FOLDER / filename
+    # Prefix with a uuid so concurrent uploads of files with the same
+    # name never collide on the same instance.
+    destination = UPLOAD_FOLDER / f"{uuid.uuid4().hex}_{original_filename}"
 
     try:
 
-        # Save uploaded PDF
+        # Save uploaded PDF to the request-scoped temp location
         with destination.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # Index into Qdrant
+        # Index into Qdrant — this is the step that actually persists
         result = index_service.index_document(
             str(destination)
         )
@@ -71,8 +92,7 @@ async def upload_pdf(
         return {
             "status": "success",
             "message": "PDF uploaded and indexed successfully.",
-            "filename": filename,
-            "path": str(destination),
+            "filename": original_filename,
             **result,
         }
 
@@ -86,3 +106,7 @@ async def upload_pdf(
     finally:
 
         file.file.close()
+
+        # Clean up the temp file — it's already embedded into Qdrant,
+        # no reason to keep it around (and /tmp space is limited).
+        destination.unlink(missing_ok=True)

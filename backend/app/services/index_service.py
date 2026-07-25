@@ -28,11 +28,7 @@ class IndexService:
         if not chunks:
             raise Exception("No chunks were created from the document.")
 
-        # -------------------------------------------------
-        # TEMPORARY FOR JINA FREE TIER TESTING
-        # Remove this line once you want to index the full PDF
-        # -------------------------------------------------
-        chunks = chunks[:3]
+        
 
         # Extract only text for embedding
         chunk_texts = [
