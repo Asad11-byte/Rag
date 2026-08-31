@@ -1,4 +1,4 @@
-# AI Agent Security RAG Application
+# AI Research RAG Application
 
 A Retrieval-Augmented Generation (RAG) application built with **FastAPI**, **React (Vite)**, **Groq LLM**, **Voyage AI Embeddings**, and **Qdrant Vector Database**. The application allows users to upload PDF documents, index them into a vector database, and ask natural language questions with answers generated from the uploaded document.
 
